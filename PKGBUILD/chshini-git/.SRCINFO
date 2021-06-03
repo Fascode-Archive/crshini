@@ -1,0 +1,12 @@
+pkgbase = crshini-git
+	pkgdesc = Shell script library that parses ini files
+	pkgver = r13.ebab259
+	pkgrel = 1
+	url = https://github.com/Hayao0819/crshini
+	arch = any
+	license = SUSHI-WARE
+	makedepends = git
+	source = git+https://github.com/Hayao0819/crshini.git
+	md5sums = SKIP
+
+pkgname = crshini-git
