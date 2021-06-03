@@ -88,12 +88,14 @@ _crshini_set(){
     # Set param
 
     # 指定されたセクションの最後の行数を取得
-    _crshini_set_section_last="$(
+    local _crshini_set_section_last_line="$(
         if (( "${#_crshini_set_paramlist[@]}" == 0 )); then
             _crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}"
         else
+            local _crshini_set_section_last_value
+            _crshini_set_section_last_value="$(_crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}")"
             for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}" - 1 )) ); do
-                if [[ "${_crshini_set_fileline[${__line}]}" = "${_crshini_set_paramlist[-1]}"*"="*"$(_crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}")" ]]; then
+                if [[ "${_crshini_set_fileline[${__line}]}" = "${_crshini_set_paramlist[-1]}"*"="*"${_crshini_set_section_last_value}" ]]; then
                     echo "${__line}"
                     exit 0
                 fi
@@ -104,7 +106,7 @@ _crshini_set(){
     
     for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}" )) ); do
         _crshini_msg_dbg "${__line}"
-        if ! (( __line == $(( _crshini_set_section_last + 1 )) )); then
+        if ! (( __line == $(( _crshini_set_section_last_line + 1 )) )); then
             if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
                 _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
             fi
@@ -119,5 +121,5 @@ _crshini_set(){
 }
 
 #_crshini_get "/usr/share/applications/chromium.desktop" 
-_crshini_set "/usr/share/applications/chromium.desktop" "Desktop Entry" "Hoge" "True"
+_crshini_set "/usr/share/applications/chromium.desktop" "Desktop Entry" "Icon" "Hoge"
 #_crshini_set "/usr/share/applications/chromium.desktop" "Entry" "hoge" "True"
