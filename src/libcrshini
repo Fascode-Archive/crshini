@@ -153,10 +153,3 @@ _crshini_set(){
     printf "%s\n" "${_crshini_set_modline[@]}"
 
 }
-
-#_crshini_get "/usr/share/applications/chromium.desktop" "Desktop Entry" "Name"
-#_crshini_get "/usr/share/applications/chromium.desktop" "Desktop Entry"
-_crshini_set "/usr/share/applications/chromium.desktop" "Desktop Entry" "Icon" "Hoge"
-#_crshini_get_line "/usr/share/applications/chromium.desktop" "Desktop Entry" "Name"
-
-#_crshini_set "/usr/share/applications/chromium.desktop" "Entry" "hoge" "True"
