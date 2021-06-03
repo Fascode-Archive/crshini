@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+
+set -eu
+
+script_path="$(dirname "$(realpath "${0}")")"
+mode="none"
+output="-"
+file=""
+section=""
+param=""
+value=""
+
+_usage () {
+    echo "A utility for manipulating ini files"
+    echo
+    echo "Usage: crudini --set [OPTION]...   config_file section   [param] [value]"
+    echo "  or:  crudini --get [OPTION]...   config_file [section] [param]"
+    #echo "  or:  crudini --del [OPTION]...   config_file section   [param] [list value]"
+    #echo "  or:  crudini --merge [OPTION]... config_file [section]"
+
+}
+
+# Find libcrshini
+libcrshini_list=("${script_path}/libcrshini" "/lib/libcrshini")
+for libcrshini in "${libcrshini_list[@]}"; do
+    [[ -f "${libcrshini}" ]] && source "${libcrshini}" && break
+done
+
+# Parse options
+ARGUMENT=("${@}")
+OPTS=("h")
+OPTL=("get" "set" "help" "version")
+if ! OPT=$(getopt -o "$(printf "%s," "${OPTS[@]}")" -l "$(printf "%s," "${OPTL[@]}")" --  "${ARGUMENT[@]}"); then
+    exit 1
+fi
+
+eval set -- "${OPT}"
+unset OPT OPTS OPTL DEFAULT_ARGUMENT
+
+while true; do
+    case "${1}" in
+        --get)
+            mode="get"
+            shift 1
+            ;;
+        --set)
+            mode="set"
+            shift 1
+            ;;
+        -h | --help)
+            _usage
+            exit 1
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+if [[ "${mode}" = "none" ]]; then
+    echo "One of --set|--get must be specified"
+    exit 1
+fi
+
+file="${1=""}"
+section="${2-""}"
+param="${3-""}"
+value="${4-""}"
+
+
+case "${mode}" in
+    "get")
+        _crshini_get "${file}" "${section}" "${param}"
+        ;;
+    "set")
+        _crshini_set "${file}" "${section}" "${param}" "${value}"
+        ;;
+esac
