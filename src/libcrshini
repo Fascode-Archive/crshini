@@ -28,7 +28,7 @@ _crshini_index_from_str(){
 _crshini_get(){
     local _crshini_get_fileline=() _crshini_get_file="${1}"
     readarray -t _crshini_get_fileline < "${_crshini_get_file}"
-    local _crshini_get_section="${2-""}"  _crshini_get_param="${3-""}" __line
+    local _crshini_get_section="${2-""}"  _crshini_get_param="${3-""}" __line _crshini_get_insection=false
     if [[ -z "${_crshini_get_section}" ]]; then
         for  __line in "${_crshini_get_fileline[@]}"; do
             [[ "${__line}" = "["*"]" ]] && echo "${__line#[%]}"
@@ -37,18 +37,18 @@ _crshini_get(){
         for __line in "${_crshini_get_fileline[@]}"; do
             case "${__line}" in
                 "[${_crshini_get_section}]")
-                    _in_section=true
+                    _crshini_get_insection=true
                     continue
                     ;;
                 "["*"]")
-                    _in_section=false
+                    _crshini_get_insection=false
                     continue
                     ;;
                 "" | "#"*)
                     continue
                     ;;
             esac
-            if [[ "${_in_section}" = true ]]; then
+            if [[ "${_crshini_get_insection}" = true ]]; then
                 if [[ -z "${_crshini_get_param}" ]]; then
                     echo "${__line%%=*}"
                 elif [[ "${__line%%=*}" = "${_crshini_get_param}" ]]; then
@@ -66,36 +66,47 @@ _crshini_set(){
     local _crshini_set_fileline=() _crshini_set_file="${1}"
     readarray -t _crshini_set_fileline < "${_crshini_set_file}"
     local _crshini_set_section="${2}" _crshini_set_param="${3-""}"  _crshini_set_value="${4-""}"
-    local __line
-    local _crshini_set_newsection=false
+    local _crshini_set_section_last_line __line _crshini_set_insert_line
 
     # Copy
     local _crshini_set_modline
     readarray -t _crshini_set_sectionlist < <(_crshini_get "${_crshini_set_file}")
     readarray -t _crshini_set_paramlist < <(_crshini_get "${_crshini_set_file}" "${_crshini_set_section}")
 
-    # Find section
+    # Find and set section
     if ! printf "%s\n" "${_crshini_set_sectionlist[@]}" | grep -x "\[${_crshini_set_section}\]" 1> /dev/null 2>&1; then
-        _crshini_set_newsection=true
-    fi
-
-    # Set section
-    if [[ "${_crshini_set_newsection}" = true ]]; then
         _crshini_set_fileline+=("[${_crshini_set_section}]")
         _crshini_set_sectionlist+=("${_crshini_set_section}")
     fi
 
-    # Set param
+    # Find and Set param
+    #if printf "%s\n" "${_crshini_set_paramlist[@]}" | grep -x "${_crshini_set_param}" 1> /dev/null 2>&1; then
+    #    
+    #fi
+
 
     # 指定されたセクションの最後の行数を取得
-    local _crshini_set_section_last_line="$(
+    _crshini_set_section_last_line="$(
         if (( "${#_crshini_set_paramlist[@]}" == 0 )); then
             _crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}"
         else
-            local _crshini_set_section_last_value
+            local _crshini_set_section_last_value _crshini_set_insection
             _crshini_set_section_last_value="$(_crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}")"
             for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}" - 1 )) ); do
-                if [[ "${_crshini_set_fileline[${__line}]}" = "${_crshini_set_paramlist[-1]}"*"="*"${_crshini_set_section_last_value}" ]]; then
+                case "${_crshini_set_fileline[${__line}]}" in
+                    "[${_crshini_set_section}]")
+                        _crshini_set_insection=true
+                        continue
+                        ;;
+                    "["*"]")
+                        _crshini_set_insection=false
+                        continue
+                        ;;
+                    "" | "#"*)
+                        continue
+                        ;;
+                esac
+                if [[ "${_crshini_set_insection}" = true ]] && [[ "${_crshini_set_fileline[${__line}]}" = "${_crshini_set_paramlist[-1]}"*"="*"${_crshini_set_section_last_value}" ]]; then
                     echo "${__line}"
                     exit 0
                 fi
@@ -103,10 +114,12 @@ _crshini_set(){
             echo "$(( "${#_crshini_set_fileline[@]}" - 1 ))"
         fi
     )"
+
+    _crshini_set_insert_line="${_crshini_set_section_last_line}"
     
     for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}" )) ); do
         _crshini_msg_dbg "${__line}"
-        if ! (( __line == $(( _crshini_set_section_last_line + 1 )) )); then
+        if ! (( __line == $(( _crshini_set_insert_line + 1 )) )); then
             if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
                 _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
             fi
