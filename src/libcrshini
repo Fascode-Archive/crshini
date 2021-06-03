@@ -46,7 +46,9 @@ _crshini_get_line(){
             _crshini_gl_output+=("$(( __line + 1 ))")
         fi
     done
-    echo "${_crshini_gl_output[-1]}"
+    if (( "${#_crshini_gl_output[@]}" != 0 )); then
+        echo "${_crshini_gl_output[-1]}"
+    fi
 }
 
 # --get command
@@ -82,7 +84,7 @@ _crshini_get(){
         done
         if [[ -z "${_crshini_get_param}" ]]; then
             printf "%s\n" "${_crshini_get_output[@]}"
-        else
+        elif (( "${#_crshini_get_output[@]}" != 0 )); then
             echo "${_crshini_get_output[-1]}"
         fi
     fi
