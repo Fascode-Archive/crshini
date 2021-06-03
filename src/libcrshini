@@ -56,9 +56,7 @@ _crshini_get(){
     readarray -t _crshini_get_fileline < "${_crshini_get_file}"
     local _crshini_get_section="${2-""}"  _crshini_get_param="${3-""}" __line _crshini_get_insection=false
     if [[ -z "${_crshini_get_section}" ]]; then
-        for  __line in "${_crshini_get_fileline[@]}"; do
-            [[ "${__line}" = "["*"]" ]] && echo "${__line#[%]}"
-        done
+        grep -E "^\[.+\]$" "${_crshini_get_file}"
     else
         for __line in "${_crshini_get_fileline[@]}"; do
             case "${__line}" in
