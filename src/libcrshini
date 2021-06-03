@@ -122,6 +122,12 @@ _crshini_set(){
         _crshini_set_mode="new"
     fi
     
+    if [[ "${_crshini_set_mode}" = "new" ]]; then
+        _crshini_set_insert_line=$(( _crshini_set_insert_line + 1 ))
+    elif [[ "${_crshini_set_mode}" = "rewrite" ]]; then
+        _crshini_set_insert_line=$(( _crshini_set_insert_line - 1 ))
+    fi
+
     for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}")) ); do
     
         if [[ "${_crshini_set_writed}" = true ]] ; then
@@ -130,26 +136,15 @@ _crshini_set(){
             fi
         fi
 
-        if [[ "${_crshini_set_mode}" = "new" ]]; then
-            if ! (( __line == _crshini_set_insert_line + 1)); then
-                if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
-                    _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
-                fi
-            else
-                _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}")
+        if ! (( __line == _crshini_set_insert_line)); then
+            if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
+                _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
             fi
         else
-            if ! (( __line == _crshini_set_insert_line - 1)); then
-                if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
-                    _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
-                fi
-            else
-                _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}")
-            fi
+            _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}")
         fi
     done
 
     # Output
     printf "%s\n" "${_crshini_set_modline[@]}"
-
 }
