@@ -1,27 +1,27 @@
-PWD = $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
-DESTDIR = /usr/
-LIBDIR = ${DESTDIR}/lib/
-BINDIR = ${DESTDIR}/bin/
+	PWD      := $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+DESTDIR  ?= /usr/
+LIBDIR   := ${DESTDIR}/lib/
+BINDIR   := ${DESTDIR}/bin/
 
 install:
-	@sudo make install-libcrshini
-	@sudo make install-crshini
+	@make PWD=${PWD} DESTDIR=${DESTDIR} LIBDIR=${LIBDIR} BINDIR=${BINDIR} install-libcrshini
+	@smake PWD=${PWD} DESTDIR=${DESTDIR} LIBDIR=${LIBDIR} BINDIR=${BINDIR} install-crshini
 
 install-libcrshini:
-	sudo install -D -m 755 "${PWD}/src/libcrshini" "${LIBDIR}"
+	install -D -m 755 "${PWD}/src/libcrshini" "${LIBDIR}"
 
 install-crshini:
-	sudo install -D -m 755 "${PWD}/src/crshini" "${BINDIR}"
+	install -D -m 755 "${PWD}/src/crshini" "${BINDIR}"
 
 uninstall:
-	@sudo make uninstall-libcrshini
-	@sudo make uninstall-crshini
+	@make PWD=${PWD} DESTDIR=${DESTDIR} LIBDIR=${LIBDIR} BINDIR=${BINDIR} uninstall-libcrshini
+	@make PWD=${PWD} DESTDIR=${DESTDIR} LIBDIR=${LIBDIR} BINDIR=${BINDIR} uninstall-crshini
 
 uninstall-libcrshini:
-	sudo rm -rf "${LIBDIR}/libcrshini"
+	rm -rf "${LIBDIR}/libcrshini"
 
 uninstall-crshini:
-	sudo rm -rf "${BINDIR}/crshini"
+	rm -rf "${BINDIR}/crshini"
 
 check:
 	@shellcheck --shell=bash "${PWD}/src/"* 
