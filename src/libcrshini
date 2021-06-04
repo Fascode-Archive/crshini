@@ -157,8 +157,8 @@ _crshini_set(){
 
     # Copy
     local _crshini_set_modline
-    readarray -t _crshini_set_sectionlist < <(_crshini_get "${_crshini_set_file}")
-    readarray -t _crshini_set_paramlist < <(_crshini_get "${_crshini_set_file}" "${_crshini_set_section}")
+    readarray -t _crshini_set_sectionlist < <(_crshini_output="-" _crshini_get "${_crshini_set_file}")
+    readarray -t _crshini_set_paramlist < <(_crshini_output="-" _crshini_get "${_crshini_set_file}" "${_crshini_set_section}")
 
     # Find and set section
     if ! printf "%s\n" "${_crshini_set_sectionlist[@]}" | grep -x "\[${_crshini_set_section}\]" 1> /dev/null 2>&1; then
@@ -168,13 +168,15 @@ _crshini_set(){
 
     # Find and Set param
     if printf "%s\n" "${_crshini_set_paramlist[@]}" | grep -x "${_crshini_set_param}" 1> /dev/null 2>&1; then
-        _crshini_set_insert_line=$(( "$(_crshini_get_line "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" ))
+        _crshini_msg_dbg "値の書き換えを行います"
+        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_line "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" ))
         _crshini_set_mode="rewrite"
     elif (( "${#_crshini_set_paramlist[@]}" == 0 )) || [[ -z "${_crshini_set_paramlist[*]}" ]]; then
-        _crshini_set_insert_line="$(_crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}")"
+        _crshini_msg_dbg "空のセクションに値を追加します"
+        _crshini_set_insert_line="$(_crshini_output="-" _crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}")"
         _crshini_set_mode="new"
     else
-        _crshini_set_insert_line=$(( "$(_crshini_get_line "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}")" - 1 ))
+        _crshini_msg_dbg "セクションの最後に追記します"
         _crshini_set_mode="new"
     fi
     
@@ -189,6 +191,7 @@ _crshini_set(){
         if [[ "${_crshini_set_writed}" = true ]] ; then
             if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
                 _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
+                continue
             fi
         fi
 
@@ -198,6 +201,7 @@ _crshini_set(){
             fi
         else
             _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}")
+            _crshini_set_writed=true
         fi
     done
 
