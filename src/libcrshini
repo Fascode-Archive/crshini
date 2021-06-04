@@ -155,6 +155,10 @@ _crshini_set(){
 
     _crshini_set_section="${1}" _crshini_set_param="${2-""}"  _crshini_set_value="${3-""}"
 
+    _crshini_msg_dbg "セクション: \"${_crshini_set_section}\""
+    _crshini_msg_dbg "パラメータ: \"${_crshini_set_param}\""
+
+
     # Copy
     local _crshini_set_modline
     readarray -t _crshini_set_sectionlist < <(_crshini_output="-" _crshini_get "${_crshini_set_file}")
@@ -165,6 +169,16 @@ _crshini_set(){
         _crshini_set_fileline+=("[${_crshini_set_section}]")
         _crshini_set_sectionlist+=("${_crshini_set_section}")
     fi
+
+    # Backup
+    #if [[ "$(realpath "${_crshini_set_file}")" = "$(realpath "${_crshini_output}")" ]]; then
+    #    _crshini_msg_dbg "${_crshini_set_file}"
+    #    cat "${_crshini_set_file}" > "${_crshini_temp}"
+    #    _crshini_set_file="${_crshini_temp}"
+    #fi
+
+    # デバッグメッセージ
+    _crshini_msg_dbg "セクション内に${#_crshini_set_paramlist[@]}個のパラメータを発見しました"
 
     # Find and Set param
     if printf "%s\n" "${_crshini_set_paramlist[@]}" | grep -x "${_crshini_set_param}" 1> /dev/null 2>&1; then
@@ -177,14 +191,20 @@ _crshini_set(){
         _crshini_set_mode="new"
     else
         _crshini_msg_dbg "セクションの最後に追記します"
+        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_line "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}")" - 1 ))
         _crshini_set_mode="new"
     fi
     
+    _crshini_msg_dbg "${_crshini_set_insert_line}行目を基準にします"
+    _crshini_msg_dbg "モードは${_crshini_set_mode}です"
+
     if [[ "${_crshini_set_mode}" = "new" ]]; then
         _crshini_set_insert_line=$(( _crshini_set_insert_line + 1 ))
     elif [[ "${_crshini_set_mode}" = "rewrite" ]]; then
         _crshini_set_insert_line=$(( _crshini_set_insert_line - 1 ))
     fi
+
+    _crshini_msg_dbg "${_crshini_set_insert_line}行目に設定されました"
 
     for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}")) ); do
     
@@ -200,6 +220,7 @@ _crshini_set(){
                 _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
             fi
         else
+            _crshini_msg_dbg "${__line}行目を書き換えました"
             _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}")
             _crshini_set_writed=true
         fi
