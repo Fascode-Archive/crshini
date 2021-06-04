@@ -15,10 +15,14 @@ stdin=false
 _usage () {
     echo "A utility for manipulating ini files"
     echo
-    echo "Usage: crudini --set [OPTION]...   config_file section   [param] [value]"
-    echo "  or:  crudini --get [OPTION]...   config_file [section] [param]"
-    #echo "  or:  crudini --del [OPTION]...   config_file section   [param] [list value]"
-    #echo "  or:  crudini --merge [OPTION]... config_file [section]"
+    echo "Usage: crshini --set [OPTION]... file section   [param] [value]"
+    echo "       crshini --get [OPTION]... file [section] [param]"
+    echo
+    echo "Options:"
+    echo "       -h | --help      Show this help message"
+    echo "            --version   Show version info and exit"
+    echo "            --optput    Set the output path ( - means stdout)"
+    echo "            --stdin     Use stdin instead of file"
 
 }
 
