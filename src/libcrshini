@@ -2,6 +2,8 @@
 
 set -eu
 
+_crshini_version="0.1"
+
 : "${_crshini_debug:=false}"
 : "${_crshini_output:=-}"
 

@@ -9,6 +9,7 @@ file=""
 section=""
 param=""
 value=""
+version="0.1"
 
 _usage () {
     echo "A utility for manipulating ini files"
@@ -18,6 +19,18 @@ _usage () {
     #echo "  or:  crudini --del [OPTION]...   config_file section   [param] [list value]"
     #echo "  or:  crudini --merge [OPTION]... config_file [section]"
 
+}
+
+_version(){
+    echo "[frontend]"
+    echo "Name=crshini"
+    echo "Version=${version}"
+    echo "Path=$(realpath "${0}")"
+    echo
+    echo "[library]"
+    echo "Name=libcrshini"
+    echo "Version=${_crshini_version}"
+    echo "Path=${libcrshini}"
 }
 
 # Find libcrshini
@@ -54,6 +67,10 @@ while true; do
         --output)
             output="${2}"
             shift 2
+            ;;
+        --version)
+            _version
+            exit 0
             ;;
         --)
             shift
