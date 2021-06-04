@@ -2,12 +2,24 @@
 
 set -eu
 
+: "${_crshini_debug:=false}"
+: "${_crshini_output:=-}"
+
 _crshini_msg_err(){ echo "[libcrshini] Error ${*}" >&2; }
 _crshini_msg_inf(){ echo "[libcrshini]  Info ${*}" >&1; }
 _crshini_msg_wrn(){ echo "[libcrshini]  Warn ${*}" >&2; }
 _crshini_msg_dbg(){ 
     if [[ "${_crshini_debug-false}" = true ]]; then
         echo "[libcrshini] Debug ${*}" >&2
+    fi
+}
+
+_crshini_print(){
+    if [[ "${_crshini_output}" = "-" ]]; then
+        echo "${@}"
+    else
+        _crshini_output="$(realpath "${_crshini_output}")"
+        echo "${@}" > "${_crshini_output}"
     fi
 }
 
@@ -47,7 +59,7 @@ _crshini_get_line(){
         fi
     done
     if (( "${#_crshini_gl_output[@]}" != 0 )); then
-        echo "${_crshini_gl_output[-1]}"
+        _crshini_print "${_crshini_gl_output[-1]}"
     fi
 }
 
@@ -83,9 +95,9 @@ _crshini_get(){
             fi
         done
         if [[ -z "${_crshini_get_param}" ]]; then
-            printf "%s\n" "${_crshini_get_output[@]}"
+            _crshini_print "$(printf "%s\n" "${_crshini_get_output[@]}")"
         elif (( "${#_crshini_get_output[@]}" != 0 )); then
-            echo "${_crshini_get_output[-1]}"
+            _crshini_print "${_crshini_get_output[-1]}"
         fi
     fi
     return 0
@@ -146,5 +158,5 @@ _crshini_set(){
     done
 
     # Output
-    printf "%s\n" "${_crshini_set_modline[@]}"
+    _crshini_print "$(printf "%s\n" "${_crshini_set_modline[@]}")"
 }
