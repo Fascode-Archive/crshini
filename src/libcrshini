@@ -2,11 +2,13 @@
 
 set -eu
 
-_crshini_version="0.1"
-
+: "${_crshini_version:="0.1"}"
+: "${_crshini_stdin:=false}"
 : "${_crshini_debug:=false}"
 : "${_crshini_output:=-}"
+: "${_crshini_temp:="/tmp/libcrshini"}"
 
+# Message function
 _crshini_msg_err(){ echo "[libcrshini] Error ${*}" >&2; }
 _crshini_msg_inf(){ echo "[libcrshini]  Info ${*}" >&1; }
 _crshini_msg_wrn(){ echo "[libcrshini]  Warn ${*}" >&2; }
@@ -16,6 +18,7 @@ _crshini_msg_dbg(){
     fi
 }
 
+# Output function
 _crshini_print(){
     if [[ "${_crshini_output}" = "-" ]]; then
         echo "${@}"
@@ -23,6 +26,11 @@ _crshini_print(){
         _crshini_output="$(realpath "${_crshini_output}")"
         echo "${@}" > "${_crshini_output}"
     fi
+}
+
+# Write Temp file
+_crshini_write_temp(){
+    echo "${@}" > "${_crshini_temp}"
 }
 
 # Get index number from string
@@ -40,8 +48,20 @@ _crshini_index_from_str(){
 # --get command with line number
 # _crshini_get_line file section param
 _crshini_get_line(){
-    local _crshini_gl_fileline=() _crshini_gl_file="${1}" _crshini_gl_section="${2}"  _crshini_gl_param="${3}" __line _crshini_gl_insection=false _crshini_gl_output=()
-    readarray -t _crshini_gl_fileline < "${_crshini_gl_file}"
+    # Set variables
+    local _crshini_gl_fileline=() _crshini_gl_file _crshini_gl_section _crshini_gl_param __line _crshini_gl_insection=false _crshini_gl_output=()
+
+    if [[ "${_crshini_stdin}" = true ]]; then
+        readarray -t _crshini_gl_fileline
+    else
+        _crshini_gl_file="${1}"
+        shift 1
+        readarray -t _crshini_gl_fileline < "${_crshini_gl_file}"
+    fi
+
+    _crshini_gl_section="${1}" _crshini_gl_param="${2}"
+
+    # Start
     for __line in $( seq 0 $(( "${#_crshini_gl_fileline[@]}" - 1 )) ); do
         case "${_crshini_gl_fileline[${__line}]}" in
             "[${_crshini_gl_section}]")
@@ -60,6 +80,8 @@ _crshini_get_line(){
             _crshini_gl_output+=("$(( __line + 1 ))")
         fi
     done
+
+    # Output
     if (( "${#_crshini_gl_output[@]}" != 0 )); then
         _crshini_print "${_crshini_gl_output[-1]}"
     fi
@@ -68,9 +90,20 @@ _crshini_get_line(){
 # --get command
 # _crshini_get file [section] [param]
 _crshini_get(){
-    local _crshini_get_fileline=() _crshini_get_file="${1}" _crshini_get_output=()
-    readarray -t _crshini_get_fileline < "${_crshini_get_file}"
-    local _crshini_get_section="${2-""}"  _crshini_get_param="${3-""}" __line _crshini_get_insection=false
+    # Set variables
+    local _crshini_get_fileline=() _crshini_get_output=() __line _crshini_get_insection=false
+    local _crshini_get_file _crshini_get_section  _crshini_get_param
+
+    if [[ "${_crshini_stdin}" = true ]]; then
+        readarray -t _crshini_get_fileline
+    else
+        _crshini_get_file="${1}"
+        shift 1
+        readarray -t _crshini_get_fileline < "${_crshini_get_file}"
+    fi
+
+    _crshini_get_section="${1-""}" _crshini_get_param="${2-""}"
+
     if [[ -z "${_crshini_get_section}" ]]; then
         grep -E "^\[.+\]$" "${_crshini_get_file}"
     else
@@ -108,10 +141,19 @@ _crshini_get(){
 # --set command
 # _crshini_set file section [param] [value]
 _crshini_set(){
-    local _crshini_set_fileline=() _crshini_set_file="${1}"
-    readarray -t _crshini_set_fileline < "${_crshini_set_file}"
-    local _crshini_set_section="${2}" _crshini_set_param="${3-""}"  _crshini_set_value="${4-""}"
+    # Set variables
+    local _crshini_set_fileline=() _crshini_set_section _crshini_set_param _crshini_set_value
     local __line _crshini_set_insert_line _crshini_set_writed=false _crshini_set_mode
+
+    if [[ "${_crshini_stdin}" = true ]]; then
+        readarray -t _crshini_set_fileline
+    else
+        _crshini_set_file="${1}"
+        shift 1
+        readarray -t _crshini_set_fileline < "${_crshini_set_file}"
+    fi
+
+    _crshini_set_section="${1}" _crshini_set_param="${2-""}"  _crshini_set_value="${3-""}"
 
     # Copy
     local _crshini_set_modline

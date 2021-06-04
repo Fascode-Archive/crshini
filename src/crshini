@@ -10,6 +10,7 @@ section=""
 param=""
 value=""
 version="0.1"
+stdin=false
 
 _usage () {
     echo "A utility for manipulating ini files"
@@ -42,7 +43,7 @@ done
 # Parse options
 ARGUMENT=("${@}")
 OPTS=("h")
-OPTL=("get" "set" "help" "version" "output:")
+OPTL=("get" "set" "help" "version" "output:" "stdin")
 if ! OPT=$(getopt -o "$(printf "%s," "${OPTS[@]}")" -l "$(printf "%s," "${OPTL[@]}")" --  "${ARGUMENT[@]}"); then
     exit 1
 fi
@@ -72,6 +73,10 @@ while true; do
             _version
             exit 0
             ;;
+        --stdin)
+            stdin=true
+            shift 1
+            ;;
         --)
             shift
             break
@@ -92,9 +97,9 @@ value="${4-""}"
 
 case "${mode}" in
     "get")
-        _crshini_output="${output}" _crshini_get "${file}" "${section}" "${param}"
+        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_get "${file}" "${section}" "${param}"
         ;;
     "set")
-        _crshini_output="${output}" _crshini_set "${file}" "${section}" "${param}" "${value}"
+        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_set "${file}" "${section}" "${param}" "${value}"
         ;;
 esac
