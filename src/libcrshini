@@ -69,7 +69,7 @@ _crshini_get(){
     _crshini_get_section="${1-""}" _crshini_get_param="${2-""}"
 
     if [[ -z "${_crshini_get_section}" ]]; then
-        grep -E "^\[.+\]$" "${_crshini_get_file}"
+        printf "%s\n" "${_crshini_get_fileline[@]}" | grep -E "^\[.+\]$"
     else
         for __line in $(seq "${#_crshini_get_fileline[@]}"); do
             case "${_crshini_get_fileline[$(( __line - 1 ))]}" in
@@ -130,8 +130,8 @@ _crshini_set(){
 
     # Copy
     local _crshini_set_modline
-    readarray -t _crshini_set_sectionlist < <(_crshini_output="-" _crshini_get "${_crshini_set_file}")
-    readarray -t _crshini_set_paramlist < <(_crshini_output="-" _crshini_get "${_crshini_set_file}" "${_crshini_set_section}")
+    readarray -t _crshini_set_sectionlist < <(printf "%s\n" "${_crshini_set_fileline[@]}" | _crshini_output="-" _crshini_stdin=true _crshini_get)
+    readarray -t _crshini_set_paramlist < <(printf "%s\n" "${_crshini_set_fileline[@]}" | _crshini_output="-" _crshini_stdin=true _crshini_get "${_crshini_set_section}")
 
     # Find and set section
     if ! printf "%s\n" "${_crshini_set_sectionlist[@]}" | grep -x "\[${_crshini_set_section}\]" 1> /dev/null 2>&1; then
