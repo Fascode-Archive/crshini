@@ -225,3 +225,37 @@ _crshini_set(){
     # Output
     _crshini_print "$(for __line in "${_crshini_set_modline[@]}"; do echo -e "${__line}"; done)"
 }
+
+# --merge command
+_crshini_merge(){
+    # Set variables
+    local _crshini_merge_file="${1}" _crshini_merge_section="${2-""}" _crshini_merge_source __section _crshini_merge_sectionlist=()
+    _crshini_merge_source="$(cat -)"
+
+    # Get sections
+    if [[ -z "${_crshini_merge_section}" ]]; then
+        while read -r __section; do
+            if ! printf "%s\n" "${_crshini_merge_sectionlist[@]}" | grep -x "${__section}" 2> /dev/null 1>&2; then
+                _crshini_msg_dbg "新しいセクション${__section}を見つけました"
+                _crshini_merge_sectionlist+=("${__section}")
+            fi
+        done < <(echo "${_crshini_merge_source}" | _crshini_stdin=true _crshini_output=- _crshini_get)
+    else
+        _crshini_merge_sectionlist+=("${_crshini_merge_section}")
+    fi
+
+    # Set Param
+    local _crshini_merge_output __param __value
+    _crshini_merge_output="$(cat "${_crshini_merge_file}")" 
+    for __section in "${_crshini_merge_sectionlist[@]}"; do
+        _crshini_msg_dbg "${__section}に入りました"
+        while read -r __param; do
+            _crshini_msg_dbg "${__param}の処理を行います"
+            __value="$(echo "${_crshini_merge_source}" | _crshini_stdin=true _crshini_output=- _crshini_get "${__section}" "${__param}")"
+            _crshini_msg_dbg "${__param}の値は${__value}です"
+            _crshini_merge_output="$(echo "${_crshini_merge_output}" | _crshini_stdin=true _crshini_output=- _crshini_set "${__section}" "${__param}" "${__value}")"
+        done < <(echo "${_crshini_merge_source}" | _crshini_stdin=true _crshini_output=- _crshini_get "${__section}")
+    done
+
+    _crshini_print "${_crshini_merge_output}"
+}
