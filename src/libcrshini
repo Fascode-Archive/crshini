@@ -156,8 +156,11 @@ _crshini_set(){
     readarray -t _crshini_set_sectionlist < <(printf "%s\n" "${_crshini_set_fileline[@]}" | _crshini_output="-" _crshini_stdin=true _crshini_get)
     readarray -t _crshini_set_paramlist < <(printf "%s\n" "${_crshini_set_fileline[@]}" | _crshini_output="-" _crshini_stdin=true _crshini_get "${_crshini_set_section}")
 
+    _crshini_msg_dbg "見つかったセクション: $(printf "[%s] " "${_crshini_set_sectionlist[@]}")"
+
     # Find and set section
-    if ! printf "%s\n" "${_crshini_set_sectionlist[@]}" | grep -x "\[${_crshini_set_section}\]" 1> /dev/null 2>&1; then
+    if ! printf "%s\n" "${_crshini_set_sectionlist[@]}" | grep -x "${_crshini_set_section}" 1> /dev/null 2>&1; then
+        _crshini_msg_dbg "新しいセクション${_crshini_set_section}を作成しました"
         _crshini_set_fileline+=("[${_crshini_set_section}]")
         _crshini_set_sectionlist+=("${_crshini_set_section}")
     fi
