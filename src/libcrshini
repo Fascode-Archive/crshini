@@ -135,13 +135,16 @@ _crshini_set(){
     local _crshini_set_fileline=() _crshini_set_section _crshini_set_param _crshini_set_value __line _crshini_set_insert_line _crshini_set_writed=false _crshini_set_mode
 
     if [[ "${_crshini_stdin}" = true ]]; then
-        readarray -t _crshini_set_fileline
+        cat - > "${_crshini_temp}"
+        _crshini_set_file="${_crshini_temp}"
     else
         _crshini_set_file="${1}"
         shift 1
         _crshini_chkfile "${_crshini_set_file}"
-        readarray -t _crshini_set_fileline < "${_crshini_set_file}"
-    fi
+    fi  
+
+    
+    readarray -t _crshini_set_fileline < "${_crshini_set_file}"
 
     _crshini_set_section="${1}" _crshini_set_param="${2-""}"  _crshini_set_value="${3-""}"
 
