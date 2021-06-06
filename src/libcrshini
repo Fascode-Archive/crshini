@@ -87,7 +87,7 @@ _crshini_get(){
     _crshini_get_section="${1-""}" _crshini_get_param="${2-""}"
 
     if [[ -z "${_crshini_get_section}" ]]; then
-        printf "%s\n" "${_crshini_get_fileline[@]}" | grep -E "^\[.+\]$"
+        printf "%s\n" "${_crshini_get_fileline[@]}" | grep -E "^\[.+\]$" | sed "s|^\[||g; s|\]$||g"
     else
         for __line in $(seq "${#_crshini_get_fileline[@]}"); do
             case "${_crshini_get_fileline[$(( __line - 1 ))]}" in
