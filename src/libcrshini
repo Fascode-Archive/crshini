@@ -9,12 +9,16 @@ set -eu
 : "${_crshini_temp:="/tmp/libcrshini"}"
 
 # Message function
-_crshini_msg_err(){ echo "[libcrshini] Error ${*}" >&2; }
-_crshini_msg_dbg(){ echo "[libcrshini]  Info ${*}" >&2; }
-_crshini_msg_wrn(){ echo "[libcrshini]  Warn ${*}" >&2; }
+_crshini_msg_common(){
+    local _funcname="${FUNCNAME[2]#_crshini}"
+    echo "[libcrshini] $(yes " " 2> /dev/null  | head -n "$(( 6 - ${#_funcname} ))" | tr -d "\n"; ) ${_funcname} ${*}" >&2
+}
+_crshini_msg_err(){ _crshini_msg_common "Error ${*}"; }
+_crshini_msg_dbg(){ _crshini_msg_common " Info ${*}"; }
+_crshini_msg_wrn(){ _crshini_msg_common " Warn ${*}"; }
 _crshini_msg_dbg(){ 
     if [[ "${_crshini_debug-false}" = true ]]; then
-        echo "[libcrshini] Debug ${*}" >&2
+        _crshini_msg_common "Debug ${*}";
     fi
 }
 
