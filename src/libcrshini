@@ -217,10 +217,11 @@ _crshini_set(){
         else
             _crshini_msg_dbg "${__line}行目を書き換えました"
             _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}")
+            [[ "${_crshini_set_mode}" = "new" ]] && _crshini_set_modline+=("")
             _crshini_set_writed=true
         fi
     done
 
     # Output
-    _crshini_print "$(printf "%s\n" "${_crshini_set_modline[@]}")"
+    _crshini_print "$(for __line in "${_crshini_set_modline[@]}"; do echo -e "${__line}"; done)"
 }
