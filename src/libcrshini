@@ -45,6 +45,23 @@ _crshini_index_from_str(){
     return 0
 }
 
+# Check file
+# _crshini_chkfile file
+_crshini_chkfile(){
+    local _file="${1-""}" _return=0
+    if [[ -z "${_file}"   ]]; then
+        _crshini_msg_err "Please specify the file path" 
+        _return 1
+    elif [[ ! -f "${_file}" ]]; then
+        _crshini_msg_err "No such file or directory"
+        _return=1
+    elif [[ ! "$(file "${_file}" --mime-type -F ":" | cut -d ":" -f 2 | tr -d " ")" = "text/plain" ]]; then
+        _crshini_msg_err "Please specity text file"
+        _return=1
+    fi
+    return "${_return}"
+}
+
 # --get command with line number
 # _crshini_get_line file section param
 _crshini_get_line(){
@@ -63,6 +80,7 @@ _crshini_get(){
     else
         _crshini_get_file="${1}"
         shift 1
+        _crshini_chkfile "${_crshini_get_file}"
         readarray -t _crshini_get_fileline < "${_crshini_get_file}"
     fi
 
@@ -97,6 +115,8 @@ _crshini_get(){
                         _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
                     fi
                 fi
+            else
+                continue
             fi
         done
         if [[ -z "${_crshini_get_param}" ]]; then
@@ -119,6 +139,7 @@ _crshini_set(){
     else
         _crshini_set_file="${1}"
         shift 1
+        _crshini_chkfile "${_crshini_set_file}"
         readarray -t _crshini_set_fileline < "${_crshini_set_file}"
     fi
 
