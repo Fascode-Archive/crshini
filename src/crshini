@@ -15,14 +15,15 @@ stdin=false
 _usage () {
     echo "A utility for manipulating ini files"
     echo
-    echo "Usage: crshini --set [OPTION]... file section   [param] [value]"
-    echo "       crshini --get [OPTION]... file [section] [param]"
+    echo "Usage: crshini --set   [OPTION]... file section   [param] [value]"
+    echo "       crshini --get   [OPTION]... file [section] [param]"
+    echo "       crshini --merge [OPTION]... file [section]"
     echo
     echo "Options:"
     echo "       -h | --help      Show this help message"
     echo "            --version   Show version info and exit"
     echo "            --optput    Set the output path ( - means stdout)"
-    echo "            --stdin     Use stdin instead of file"
+    echo "            --stdin     Use stdin instead of file (--merge is always true)"
 
 }
 
@@ -47,7 +48,7 @@ done
 # Parse options
 ARGUMENT=("${@}")
 OPTS=("h")
-OPTL=("get" "set" "help" "version" "output:" "stdin")
+OPTL=("get" "set" "merge" "help" "version" "output:" "stdin")
 if ! OPT=$(getopt -o "$(printf "%s," "${OPTS[@]}")" -l "$(printf "%s," "${OPTL[@]}")" --  "${ARGUMENT[@]}"); then
     exit 1
 fi
@@ -63,6 +64,10 @@ while true; do
             ;;
         --set)
             mode="set"
+            shift 1
+            ;;
+        --merge)
+            mode="merge"
             shift 1
             ;;
         -h | --help)
@@ -98,6 +103,7 @@ section="${2-""}"
 param="${3-""}"
 value="${4-""}"
 
+export _crshini_debug=true
 
 case "${mode}" in
     "get")
@@ -105,5 +111,8 @@ case "${mode}" in
         ;;
     "set")
         _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_set "${file}" "${section}" "${param}" "${value}"
+        ;;
+    "merge")
+        _crshini_output="${output}" _crshini_stdin=true _crshini_merge "${file}" "${section}"
         ;;
 esac
