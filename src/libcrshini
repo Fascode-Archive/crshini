@@ -106,7 +106,7 @@ _crshini_get(){
             esac
             if [[ "${_crshini_get_insection}" = true ]]; then
                 if [[ -z "${_crshini_get_param}" ]]; then
-                    _crshini_get_output+=("${${_crshini_gl_fileline[$(( __line - 1 ))]}%%=*}")
+                    _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")
                 elif [[ "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_get_param}" ]]; then
                     _crshini_msg_dbg "${__line}行目に発見しました"
                     if [[ "${_crshini_get_linemode}" = true ]]; then
