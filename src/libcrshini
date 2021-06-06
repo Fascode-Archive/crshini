@@ -62,11 +62,6 @@ _crshini_chkfile(){
     return "${_return}"
 }
 
-# --get command with line number
-# _crshini_get_line file section param
-_crshini_get_line(){
-    _crshini_get_linemode=true _crshini_get "${@}"
-}
 
 # --get command
 # _crshini_get file [section] [param]
@@ -176,7 +171,7 @@ _crshini_set(){
     # Find and Set param
     if printf "%s\n" "${_crshini_set_paramlist[@]}" | grep -x "${_crshini_set_param}" 1> /dev/null 2>&1; then
         _crshini_msg_dbg "値の書き換えを行います"
-        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_line "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" ))
+        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_linemode=true _crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" ))
         _crshini_set_mode="rewrite"
     elif (( "${#_crshini_set_paramlist[@]}" == 0 )) || [[ -z "${_crshini_set_paramlist[*]}" ]]; then
         _crshini_msg_dbg "空のセクションに値を追加します"
@@ -184,7 +179,7 @@ _crshini_set(){
         _crshini_set_mode="new"
     else
         _crshini_msg_dbg "セクションの最後に追記します"
-        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_line "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}")" - 1 ))
+        _crshini_set_insert_line=$(( "$( _crshini_stdin=true _crshini_output="-" _crshini_get_linemode=true _crshini_get  "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}" < "${_crshini_set_file}" )" - 1 ))
         _crshini_set_mode="new"
     fi
     
