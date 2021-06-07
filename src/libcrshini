@@ -164,7 +164,7 @@ _crshini_set(){
     # Find and Set param
     if printf "%s\n" "${_crshini_set_paramlist[@]}" | grep -x "${_crshini_set_param}" 1> /dev/null 2>&1; then
         _crshini_msg_dbg "値の書き換えを行います"
-        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_linemode=true _crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" - 1 ))
+        _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_linemode=true _crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" ))
     elif (( "${#_crshini_set_paramlist[@]}" == 0 )) || [[ -z "${_crshini_set_paramlist[*]}" ]]; then
         _crshini_msg_dbg "空のセクションに値を追加します"
         _crshini_set_insert_line="$(( $(_crshini_output="-" _crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}") + 1))"
@@ -175,20 +175,19 @@ _crshini_set(){
     
     _crshini_msg_dbg "${_crshini_set_insert_line}行目に設定されました"
 
-    for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}")) ); do
+    for __line in $( seq $(( "${#_crshini_set_fileline[@]}" + 1 )) ); do
+        _crshini_set_now_line="${_crshini_set_fileline[$(( __line - 1 ))]-""}" _crshini_set_next_line="${_crshini_set_fileline[${__line}]-""}"
         if [[ "${_crshini_set_writed}" = true ]] ; then
-            if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
-                _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
+            if [[ -n "${_crshini_set_now_line+SET}" ]]; then
+                _crshini_set_modline+=("${_crshini_set_now_line}")
                 continue
             fi
         elif ! (( __line == _crshini_set_insert_line)); then
-            if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
-                _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
-            fi
+            [[ -n "${_crshini_set_now_line+SET}" ]] && _crshini_set_modline+=("${_crshini_set_now_line}")
         else
             _crshini_msg_dbg "${__line}行目を書き換えました"
             _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}") _crshini_set_writed=true
-            if [[ -z "${_crshini_set_fileline[$(( __line + 1 ))]+SET}" ]] || [[ "${_crshini_set_fileline[$(( __line + 1 ))]}" = "["*"]" ]]; then
+            if [[ -z "${_crshini_set_next_line+SET}" ]] || [[ "${_crshini_set_next_line}" = "["*"]" ]]; then
                 _crshini_set_modline+=("")
             fi
         fi
