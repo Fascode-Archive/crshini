@@ -132,7 +132,6 @@ _crshini_get(){
 _crshini_set(){
     # Set variables
     local _crshini_set_fileline=() _crshini_set_section _crshini_set_param _crshini_set_value __line _crshini_set_insert_line _crshini_set_writed=false _crshini_set_mode
-
     if [[ "${_crshini_stdin}" = true ]]; then
         cat - > "${_crshini_temp}"
         _crshini_set_file="${_crshini_temp}"
@@ -142,20 +141,15 @@ _crshini_set(){
         _crshini_chkfile "${_crshini_set_file}"
     fi  
 
-    
     readarray -t _crshini_set_fileline < "${_crshini_set_file}"
-
     _crshini_set_section="${1}" _crshini_set_param="${2-""}"  _crshini_set_value="${3-""}"
-
     _crshini_msg_dbg "セクション: \"${_crshini_set_section}\""
     _crshini_msg_dbg "パラメータ: \"${_crshini_set_param}\""
-
 
     # Copy
     local _crshini_set_modline
     readarray -t _crshini_set_sectionlist < <(printf "%s\n" "${_crshini_set_fileline[@]}" | _crshini_output="-" _crshini_stdin=true _crshini_get)
     readarray -t _crshini_set_paramlist < <(printf "%s\n" "${_crshini_set_fileline[@]}" | _crshini_output="-" _crshini_stdin=true _crshini_get "${_crshini_set_section}")
-
     _crshini_msg_dbg "見つかったセクション: $(printf "[%s] " "${_crshini_set_sectionlist[@]}")"
 
     # Find and set section
@@ -164,13 +158,6 @@ _crshini_set(){
         _crshini_set_fileline+=("[${_crshini_set_section}]")
         _crshini_set_sectionlist+=("${_crshini_set_section}")
     fi
-
-    # Backup
-    #if [[ "$(realpath "${_crshini_set_file}")" = "$(realpath "${_crshini_output}")" ]]; then
-    #    _crshini_msg_dbg "${_crshini_set_file}"
-    #    cat "${_crshini_set_file}" > "${_crshini_temp}"
-    #    _crshini_set_file="${_crshini_temp}"
-    #fi
 
     # デバッグメッセージ
     _crshini_msg_dbg "セクション内に${#_crshini_set_paramlist[@]}個のパラメータを発見しました"
@@ -202,15 +189,12 @@ _crshini_set(){
     _crshini_msg_dbg "${_crshini_set_insert_line}行目に設定されました"
 
     for __line in $( seq 0 $(( "${#_crshini_set_fileline[@]}")) ); do
-    
         if [[ "${_crshini_set_writed}" = true ]] ; then
             if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
                 _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
                 continue
             fi
-        fi
-
-        if ! (( __line == _crshini_set_insert_line)); then
+        elif ! (( __line == _crshini_set_insert_line)); then
             if [[ -n "${_crshini_set_fileline[${__line}]+SET}" ]]; then
                 _crshini_set_modline+=("${_crshini_set_fileline[${__line}]}")
             fi
