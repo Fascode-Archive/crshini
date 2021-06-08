@@ -11,6 +11,7 @@ param=""
 value=""
 version="0.1"
 stdin=false
+: "${_crshini_version:=${version}}"
 
 _usage () {
     echo "A utility for manipulating ini files"
