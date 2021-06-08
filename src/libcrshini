@@ -233,10 +233,10 @@ _crshini_merge(){
 
 
 # --del command
-# _crshini_del file section [param] [list value]
+# _crshini_del file section [list param]
 _crshini_del(){
     # Set variables
-    local _crshini_del_fileline=() _crshini_del_output=() __line _crshini_del_insection=false _crshini_del_file _crshini_del_section  _crshini_del_param
+    local _crshini_del_fileline=() _crshini_del_output=() __line _crshini_del_insection=false _crshini_del_file _crshini_del_section  _crshini_del_param _crshini_del_lineout
     if [[ "${_crshini_stdin}" = true ]]; then
         readarray -t _crshini_del_fileline
     else
@@ -246,9 +246,11 @@ _crshini_del(){
         readarray -t _crshini_del_fileline < "${_crshini_del_file}"
     fi
 
-    _crshini_del_section="${1}" _crshini_del_param="${2-""}"
+    _crshini_del_section="${1}" && shift 1
+    _crshini_del_param=("${@}")
 
     for __line in $(seq "${#_crshini_del_fileline[@]}"); do
+        _crshini_del_lineout=true
         case "${_crshini_del_fileline[$(( __line - 1 ))]}" in
             "[${_crshini_del_section}]")
                 _crshini_del_insection=true
@@ -258,10 +260,24 @@ _crshini_del(){
                 _crshini_del_insection=false
                 ;;
         esac
-        if [[ "${_crshini_del_insection}" = true ]] && { [[ -z "${_crshini_del_param}" ]] || [[ "${_crshini_del_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_del_param}" ]]; }; then
-            _crshini_msg_dbg "${__line}行目を削除しました"
+
+        if [[ "${_crshini_del_insection}"  = false ]]; then
+            _crshini_del_lineout=true # 出力する
+        elif [[ -z "${_crshini_del_param}" ]]; then #あとで配列版に書き直す
+            _crshini_del_lineout=false # セクション内にいて、パラメータが設定されていないので出力しない
         else
+            for __param in "${_crshini_del_param[@]}"; do
+                if [[ "${_crshini_del_fileline[$(( __line - 1 ))]%%=*}" = "${__param}" ]]; then
+                    _crshini_del_lineout=false # パラメータの削除一覧に該当したので出力しない
+                    break
+                fi
+            done
+        fi
+         
+        if [[ "${_crshini_del_lineout}" = true ]]; then # _crshini_del_lineoutがtrueなら出力する、falseなら出力しない
             _crshini_del_output+=("${_crshini_del_fileline[$(( __line - 1 ))]}")
+        else
+            _crshini_msg_dbg "${__line}行目を削除しました"
         fi
     done
 
