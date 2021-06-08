@@ -200,8 +200,7 @@ _crshini_set(){
 # --merge command
 _crshini_merge(){
     # Set variables
-    local _crshini_merge_file="${1}" _crshini_merge_section="${2-""}" _crshini_merge_source __section _crshini_merge_sectionlist=()
-    _crshini_merge_source="$(cat -)"
+    local _crshini_merge_file="${1}" _crshini_merge_section="${2-""}" _crshini_merge_source __section _crshini_merge_sectionlist=() _crshini_merge_source="$(cat -)"
 
     # Get sections
     if [[ -z "${_crshini_merge_section}" ]]; then
@@ -263,7 +262,7 @@ _crshini_del(){
 
         if [[ "${_crshini_del_insection}"  = false ]]; then
             _crshini_del_lineout=true # 出力する
-        elif [[ -z "${_crshini_del_param}" ]]; then #あとで配列版に書き直す
+        elif (( "${#_crshini_del_param[@]}" == 0 )); then
             _crshini_del_lineout=false # セクション内にいて、パラメータが設定されていないので出力しない
         else
             for __param in "${_crshini_del_param[@]}"; do
