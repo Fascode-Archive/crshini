@@ -49,7 +49,7 @@ done
 # Parse options
 ARGUMENT=("${@}")
 OPTS=("h")
-OPTL=("get" "set" "merge" "del" "help" "version" "output:" "stdin")
+OPTL=("get" "set" "merge" "del" "help" "version" "output:" "stdin" "debug")
 if ! OPT=$(getopt -o "$(printf "%s," "${OPTS[@]}")" -l "$(printf "%s," "${OPTL[@]}")" --  "${ARGUMENT[@]}"); then
     exit 1
 fi
@@ -89,6 +89,10 @@ while true; do
             ;;
         --stdin)
             stdin=true
+            shift 1
+            ;;
+        --debug)
+            export _crshini_debug=true
             shift 1
             ;;
         --)
