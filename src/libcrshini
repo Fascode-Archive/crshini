@@ -128,7 +128,7 @@ _crshini_get(){
 }
 
 # --set command
-# _crshini_set file section [param] [value]
+# _crshini_set file section param value
 _crshini_set(){
     # Set variables
     local _crshini_set_fileline=() _crshini_set_section _crshini_set_param _crshini_set_value __line _crshini_set_insert_line _crshini_set_writed=false _crshini_set_modline
@@ -142,7 +142,11 @@ _crshini_set(){
     fi  
 
     readarray -t _crshini_set_fileline < "${_crshini_set_file}"
-    _crshini_set_section="${1}" _crshini_set_param="${2-""}" _crshini_set_value="${3-""}"
+    _crshini_set_section="${1=""}" _crshini_set_param="${2-""}" _crshini_set_value="${3-""}"
+    [[ -z "${_crshini_set_section+SET}" ]] && _crshini_msg_err "Please specity section" && return 1
+    [[ -z "${_crshini_set_param+SET}" ]] && _crshini_msg_err "Please specity parameter" && return 1
+    [[ -z "${_crshini_set_value+SET}" ]] && _crshini_msg_err "Please specity value" && return 1
+
     _crshini_msg_dbg "セクション: \"${_crshini_set_section}\""
     _crshini_msg_dbg "パラメータ: \"${_crshini_set_param}\""
 
@@ -246,7 +250,7 @@ _crshini_del(){
         readarray -t _crshini_del_fileline < "${_crshini_del_file}"
     fi
 
-    _crshini_del_section="${1}" && shift 1
+    _crshini_del_section="${1-""}" && shift 1
     _crshini_del_param=("${@}")
 
     for __line in $(seq "${#_crshini_del_fileline[@]}"); do
