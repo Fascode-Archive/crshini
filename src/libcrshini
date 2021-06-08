@@ -236,7 +236,7 @@ _crshini_merge(){
 # _crshini_del file section [param] [list value]
 _crshini_del(){
     # Set variables
-    local _crshini_del_fileline=() _crshini_del_output=() __line _crshini_del_insection=false _crshini_del_file _crshini_del_section  _crshini_del_param _crshini_del_value=()
+    local _crshini_del_fileline=() _crshini_del_output=() __line _crshini_del_insection=false _crshini_del_file _crshini_del_section  _crshini_del_param
     if [[ "${_crshini_stdin}" = true ]]; then
         readarray -t _crshini_del_fileline
     else
@@ -246,12 +246,25 @@ _crshini_del(){
         readarray -t _crshini_del_fileline < "${_crshini_del_file}"
     fi
 
-    _crshini_del_section="${1}" && shift 1
+    _crshini_del_section="${1}" _crshini_del_param="${2-""}"
 
-    if [[ -v 2 ]]; then
-        _crshini_del_param="${1-""}" && shift 1
-        _crshini_del_value=("${@}")
-    fi
+    for __line in $(seq "${#_crshini_del_fileline[@]}"); do
+        case "${_crshini_del_fileline[$(( __line - 1 ))]}" in
+            "[${_crshini_del_section}]")
+                _crshini_del_insection=true
+                _crshini_msg_dbg "${__line}行目でセクション${_crshini_del_section}に入りました"
+                ;;
+            "["*"]")
+                _crshini_del_insection=false
+                ;;
+        esac
+        if [[ "${_crshini_del_insection}" = true ]] && { [[ -z "${_crshini_del_param}" ]] || [[ "${_crshini_del_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_del_param}" ]]; }; then
+            _crshini_msg_dbg "${__line}行目を削除しました"
+        else
+            _crshini_del_output+=("${_crshini_del_fileline[$(( __line - 1 ))]}")
+        fi
+    done
 
-
+    _crshini_print "$(for __line in "${_crshini_del_output[@]}"; do echo -e "${__line}"; done)"
+    return 0
 }
