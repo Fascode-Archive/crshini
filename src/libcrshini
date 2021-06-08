@@ -230,3 +230,28 @@ _crshini_merge(){
 
     _crshini_print "${_crshini_merge_output}"
 }
+
+
+# --del command
+# _crshini_del file section [param] [list value]
+_crshini_del(){
+    # Set variables
+    local _crshini_del_fileline=() _crshini_del_output=() __line _crshini_del_insection=false _crshini_del_file _crshini_del_section  _crshini_del_param _crshini_del_value=()
+    if [[ "${_crshini_stdin}" = true ]]; then
+        readarray -t _crshini_del_fileline
+    else
+        _crshini_del_file="${1}"
+        shift 1
+        _crshini_chkfile "${_crshini_del_file}"
+        readarray -t _crshini_del_fileline < "${_crshini_del_file}"
+    fi
+
+    _crshini_del_section="${1}" && shift 1
+
+    if [[ -v 2 ]]; then
+        _crshini_del_param="${1-""}" && shift 1
+        _crshini_del_value=("${@}")
+    fi
+
+
+}
