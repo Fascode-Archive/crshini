@@ -48,7 +48,7 @@ done
 # Parse options
 ARGUMENT=("${@}")
 OPTS=("h")
-OPTL=("get" "set" "merge" "help" "version" "output:" "stdin")
+OPTL=("get" "set" "merge" "del" "help" "version" "output:" "stdin")
 if ! OPT=$(getopt -o "$(printf "%s," "${OPTS[@]}")" -l "$(printf "%s," "${OPTL[@]}")" --  "${ARGUMENT[@]}"); then
     exit 1
 fi
@@ -68,6 +68,10 @@ while true; do
             ;;
         --merge)
             mode="merge"
+            shift 1
+            ;;
+        --del)
+            mode="del"
             shift 1
             ;;
         -h | --help)
@@ -114,5 +118,8 @@ case "${mode}" in
         ;;
     "merge")
         _crshini_output="${output}" _crshini_stdin=true _crshini_merge "${file}" "${section}"
+        ;;
+    "del")
+        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_del "${file}" "${section}" "${param}"
         ;;
 esac
