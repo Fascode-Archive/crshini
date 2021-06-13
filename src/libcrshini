@@ -75,6 +75,8 @@ _crshini_get(){
     local _crshini_get_fileline=() _crshini_get_output=() __line _crshini_get_insection=false _crshini_get_file _crshini_get_section  _crshini_get_param _crshini_get_linemode _crshini_get_current_section
     : "${_crshini_get_linemode:=false}" "${_crshini_get_format:=default}"
 
+    ! [[ "${_crshini_get_format}" = "lines" || "${_crshini_get_format}" = "default" || "${_crshini_get_format}" = "ini" || "${_crshini_get_format}" = "sh" ]] && _crshini_msg_err "Incorrect format" && return 1
+
     if [[ "${_crshini_stdin}" = true ]]; then
         readarray -t _crshini_get_fileline
     else
