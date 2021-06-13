@@ -131,7 +131,8 @@ _crshini_get(){
                     fi
                     case "${_crshini_get_format}" in
                         "default")
-                            _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")
+                            [[ -z "${_crshini_get_param}" ]] && _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")
+                            [[ -n "${_crshini_get_param}" ]] && _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
                             ;;
                         "sh")
                             _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}=\"${_crshini_get_fileline[$(( __line - 1 ))]##*=}\"")
