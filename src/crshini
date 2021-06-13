@@ -15,12 +15,14 @@ _usage () {
     echo
     echo "Usage: crshini --set   [OPTION]... file section   [param] [value]"
     echo "       crshini --get   [OPTION]... file [section] [param]"
+    echo "       crshini --swl   [OPTION]... file [section] [list param]"
     echo "       crshini --merge [OPTION]... file [section]"
     echo
     echo "Options:"
     echo "       -h | --help      Show this help message"
     echo "            --version   Show version info and exit"
     echo "            --optput    Set the output path ( - means stdout)"
+    echo "            --format    Set the output format (default sh ini lines)"
     echo "            --stdin     Use stdin instead of file (--merge is always true)"
 
 }
