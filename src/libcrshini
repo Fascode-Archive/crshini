@@ -72,7 +72,7 @@ _crshini_chkfile(){
 _crshini_get(){
     # Set variables
     local _crshini_get_fileline=() _crshini_get_output=() __line _crshini_get_insection=false _crshini_get_file _crshini_get_section  _crshini_get_param _crshini_get_linemode
-    : "${_crshini_get_linemode:=false}"
+    : "${_crshini_get_linemode:=false}" "${_crshini_get_format:=default}"
 
     if [[ "${_crshini_stdin}" = true ]]; then
         readarray -t _crshini_get_fileline
@@ -85,9 +85,9 @@ _crshini_get(){
 
     _crshini_get_section="${1-""}" _crshini_get_param="${2-""}"
 
-    if [[ -z "${_crshini_get_section}" ]]; then
-        printf "%s\n" "${_crshini_get_fileline[@]}" | grep -E "^\[.+\]$" | sed "s|^\[||g; s|\]$||g"
-    else
+    #if [[ -z "${_crshini_get_section}" ]]; then
+        #printf "%s\n" "${_crshini_get_fileline[@]}" | grep -E "^\[.+\]$" | sed "s|^\[||g; s|\]$||g"
+    #else
         for __line in $(seq "${#_crshini_get_fileline[@]}"); do
             case "${_crshini_get_fileline[$(( __line - 1 ))]}" in
                 "[${_crshini_get_section}]")
@@ -96,8 +96,22 @@ _crshini_get(){
                     continue
                     ;;
                 "["*"]")
-                    _crshini_get_insection=false
-                    continue
+                    if [[ -n "${_crshini_get_section}" ]]; then
+                        _crshini_get_insection=false
+                        continue
+                    else
+                        case "${_crshini_get_format}" in
+                            "default" | "sh")
+                                _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")")
+                                ;;
+                            #"lines")
+                            #    _crshini_get_output+=("[ ${_crshini_get_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                            #    ;;
+                            "ini")
+                                _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]}")
+                                ;;
+                        esac
+                    fi
                     ;;
                 "" | "#"*)
                     continue
@@ -105,13 +119,41 @@ _crshini_get(){
             esac
             if [[ "${_crshini_get_insection}" = true ]]; then
                 if [[ -z "${_crshini_get_param}" ]]; then
-                    _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")
+                    # パラメータが空なので全パラメータを出力する
+                    case "${_crshini_get_format}" in
+                        "default")
+                            _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")
+                            ;;
+                        "sh")
+                            _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}=\"${_crshini_get_fileline[$(( __line - 1 ))]##*=}\"")
+                            ;;
+                        "lines")
+                            _crshini_get_output+=("[ ${_crshini_get_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                            ;;
+                        "ini")
+                            _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                            ;;
+                    esac
                 elif [[ "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_get_param}" ]]; then
                     _crshini_msg_dbg "${__line}行目に発見しました"
                     if [[ "${_crshini_get_linemode}" = true ]]; then
                         _crshini_get_output+=("${__line}")
                     else
-                        _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                        # パラメータまで指定されているので、1つだけ出力する
+                        case "${_crshini_get_format}" in
+                            "default")
+                                _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")
+                                ;;
+                            "sh")
+                                _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*}=\"${_crshini_get_fileline[$(( __line - 1 ))]##*=}\"")
+                                ;;
+                            "lines")
+                                _crshini_get_output+=("[ ${_crshini_get_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                                ;;
+                            "ini")
+                                _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                                ;;
+                        esac
                     fi
                 fi
             else
@@ -123,7 +165,7 @@ _crshini_get(){
         elif (( "${#_crshini_get_output[@]}" != 0 )); then
             _crshini_print "${_crshini_get_output[-1]}"
         fi
-    fi
+    #fi
     return 0
 }
 
