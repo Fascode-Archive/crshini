@@ -25,11 +25,12 @@ _crshini_msg_dbg(){
 # Output function
 _crshini_print(){
     if [[ "${_crshini_output}" = "-" ]]; then
-        echo "${@}"
+        [[ -n "${*}" ]] && echo "${@}"
     else
         _crshini_output="$(realpath "${_crshini_output}")"
         echo "${@}" > "${_crshini_output}"
     fi
+    return 0
 }
 
 # Write Temp file
