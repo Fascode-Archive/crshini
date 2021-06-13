@@ -322,5 +322,3 @@ _crshini_del(){
     _crshini_print "$(for __line in "${_crshini_del_output[@]}"; do echo -e "${__line}"; done)"
     return 0
 }
-
-_crshini_get_format="lines" _crshini_get /usr/share/applications/chromium.desktop
