@@ -10,8 +10,8 @@ set -eu
 
 # Message function
 _crshini_msg_common(){
-    local _funcname="${FUNCNAME[2]#_crshini}"
-    echo "[libcrshini] $(yes " " 2> /dev/null  | head -n "$(( 6 - ${#_funcname} ))" | tr -d "\n"; ) ${_funcname} ${*}" >&2
+    local _funcname="${FUNCNAME[2]#_crshini_}"
+    echo "[libcrshini] $(yes " " 2> /dev/null  | head -n "$(( 7 - ${#_funcname} ))" | tr -d "\n"; ) ${_funcname} ${*}" >&2
 }
 _crshini_msg_err(){ _crshini_msg_common "Error ${*}"; }
 _crshini_msg_dbg(){ _crshini_msg_common " Info ${*}"; }
