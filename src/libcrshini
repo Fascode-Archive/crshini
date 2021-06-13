@@ -86,38 +86,40 @@ _crshini_get(){
     _crshini_get_section="${1-""}" _crshini_get_param="${2-""}"
 
     for __line in $(seq "${#_crshini_get_fileline[@]}"); do
-        case "${_crshini_get_fileline[$(( __line - 1 ))]}" in
-            "[${_crshini_get_section}]")
-                _crshini_get_insection=true
-                _crshini_msg_dbg "${__line}行目でセクション${_crshini_get_section}に入りました"
-                continue
-                ;;
-            "["*"]")
-                if [[ -n "${_crshini_get_section}" ]]; then
+        [[ -z "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" ]] && continue
+        if [[ -n "${_crshini_get_section}" ]]; then
+            case "${_crshini_get_fileline[$(( __line - 1 ))]}" in
+                "[${_crshini_get_section}]")
+                    _crshini_get_insection=true
+                    _crshini_msg_dbg "${__line}行目でセクション${_crshini_get_section}に入りました"
+                    continue
+                    ;;
+                "["*"]")
                     _crshini_get_insection=false
                     continue
-                else
-                    case "${_crshini_get_format}" in
-                        "default" | "sh")
-                            _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")")
-                            ;;
-                        "ini")
-                            _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]}")
-                            ;;
-                        "lines")
-                            _crshini_get_insection=true
-                            _crshini_get_current_section="$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")"
-                            ;;
-                    esac
+                    ;;
+                "" | "#"*)
                     continue
-                fi
-                ;;
-            "" | "#"*)
-                continue
-                ;;
-        esac
-        if [[ "${_crshini_get_insection}" = true ]]; then
-            if [[ -n "${_crshini_get_section}" ]]; then
+                    ;;
+            esac
+        else
+            case "${_crshini_get_format}" in
+                "default" | "sh")
+                    _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")")
+                    ;;
+                "ini")
+                    _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]}")
+                    ;;
+                "lines")
+                    if [[ "${_crshini_get_fileline[$(( __line - 1 ))]}" = "["*"]" ]]; then
+                        _crshini_get_current_section="$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")"
+                    fi
+                    ;;
+            esac
+        fi
+
+        if [[ -n "${_crshini_get_section}" ]]; then
+            if [[ "${_crshini_get_insection}" = true ]]; then
                 if [[ -z "${_crshini_get_param}" ]] || [[ "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_get_param}" ]]; then
                     if [[ -n "${_crshini_get_param}" ]]; then
                         _crshini_msg_dbg "${__line}行目に発見しました"
@@ -142,11 +144,11 @@ _crshini_get(){
                     esac
                 fi
             else
-                # セクションが空でフォーマットがlines
-                _crshini_get_output+=("[ ${_crshini_get_current_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+                continue
             fi
         else
-            continue
+            # セクションが空でフォーマットがlines
+            _crshini_get_output+=("[ ${_crshini_get_current_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
         fi
     done
     if [[ -z "${_crshini_get_param}" ]]; then
