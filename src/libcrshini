@@ -192,9 +192,12 @@ _crshini_set(){
     # Find and set section
     if ! printf "%s\n" "${_crshini_set_sectionlist[@]}" | grep -x "${_crshini_set_section}" 1> /dev/null 2>&1; then
         _crshini_msg_dbg "新しいセクション${_crshini_set_section}を作成しました"
-        _crshini_set_fileline+=("[${_crshini_set_section}]")
+        _crshini_set_fileline+=("" "[${_crshini_set_section}]")
         _crshini_set_sectionlist+=("${_crshini_set_section}")
     fi
+
+    #printf "%s\n" "${_crshini_set_fileline[@]}"
+
 
     # デバッグメッセージ
     _crshini_msg_dbg "セクション内に${#_crshini_set_paramlist[@]}個のパラメータを発見しました"
@@ -205,7 +208,7 @@ _crshini_set(){
         _crshini_set_insert_line=$(( "$(_crshini_output="-" _crshini_get_linemode=true _crshini_get "${_crshini_set_file}" "${_crshini_set_section}" "${_crshini_set_param}")" ))
     elif (( "${#_crshini_set_paramlist[@]}" == 0 )) || [[ -z "${_crshini_set_paramlist[*]}" ]]; then
         _crshini_msg_dbg "空のセクションに値を追加します"
-        _crshini_set_insert_line="$(( $(_crshini_output="-" _crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}") + 1))"
+        _crshini_set_insert_line="$(( $(_crshini_output="-" _crshini_index_from_str "[${_crshini_set_section}]" "${_crshini_set_fileline[@]}") + 2))"
     else
         _crshini_msg_dbg "セクションの最後に追記します"
         _crshini_set_insert_line="$( _crshini_stdin=true _crshini_output="-" _crshini_get_linemode=true _crshini_get  "${_crshini_set_section}" "${_crshini_set_paramlist[-1]}" < "${_crshini_set_file}" )"
@@ -225,6 +228,7 @@ _crshini_set(){
         else
             _crshini_msg_dbg "${__line}行目を書き換えました"
             _crshini_set_modline+=("${_crshini_set_param}=${_crshini_set_value}") _crshini_set_writed=true
+
             if [[ -z "${_crshini_set_next_line+SET}" ]] || [[ "${_crshini_set_next_line}" = "["*"]" ]]; then
                 _crshini_set_modline+=("")
             fi
