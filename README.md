@@ -11,5 +11,5 @@ Please refer to [the document](./libcrshini.md) for detailed specifications and 
 
 ### Crshini
 Crshini is a command line tool implemented using Libcrshini.   
-It is not fully compatible, but can be used as an alternative to crshini.   
+It is not fully compatible, but can be used as an alternative to crudini.   
 This script is short so you can refer to it as an example implementation of Libcrshini.
