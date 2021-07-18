@@ -8,6 +8,7 @@ output="-"
 version="0.1"
 stdin=false
 format="default"
+cutomized_output=false
 : "${_crshini_version:=${version}}"
 
 _usage () {
@@ -80,6 +81,7 @@ while true; do
             ;;
         --output)
             output="${2}"
+            cutomized_output=true
             shift 2
             ;;
         --version)
@@ -111,6 +113,7 @@ if [[ "${mode}" = "none" ]]; then
 fi
 
 # _check_arg <min arg quantity> <max arg quantity> "${@}"
+# Set 0 to unlimit 
 _check_arg(){
     local _arg_min="${1}" _arg_max="${2}" && shift 2
     if (( "${#}" < _arg_min )); then
@@ -121,6 +124,10 @@ _check_arg(){
         exit 1
     fi
 }
+
+if [[ "${cutomized_output}" = false ]]; then
+    output="${1-"${output}"}"
+fi
 
 case "${mode}" in
     "get")
