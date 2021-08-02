@@ -117,7 +117,7 @@ _crshini_get(){
                     _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]}")
                     ;;
                 "lines")
-                    _crshini_get_current_section="$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")"
+                    _crshini_get_current_section="$(echo "${_crshini_get_fileline[$(( __line - 1 ))]%%#*}" | sed "s|\s*\[||g; s|\]\s*$||g")"
                     ;;
             esac
         fi
