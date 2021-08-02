@@ -108,16 +108,17 @@ _crshini_get(){
                     continue
                     ;;
             esac
-        elif [[ "${_crshini_get_fileline[$(( __line - 1 ))]}" = *"["*"]"* ]]; then
+        elif [[ "$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\s*\[|\[|g; s|\]\s*$|\]|g")" = "["*"]" ]]; then
             case "${_crshini_get_format}" in
                 "default" | "sh")
-                    _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]%%#*}" | sed "s|\s*\[||g; s|\]\s*$||g")")
+                    _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]%%#*}" | sed "s|^\s*\[||g; s|\]\s*$||g")")
                     ;;
                 "ini")
                     _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]}")
                     ;;
                 "lines")
-                    _crshini_get_current_section="$(echo "${_crshini_get_fileline[$(( __line - 1 ))]%%#*}" | sed "s|\s*\[||g; s|\]\s*$||g")"
+                    _crshini_get_current_section="$(echo "${_crshini_get_fileline[$(( __line - 1 ))]%%#*}" | sed "s|^\s*\[||g; s|\]\s*$||g")"
+                    continue
                     ;;
             esac
         fi
@@ -153,7 +154,11 @@ _crshini_get(){
             fi
         else
             # セクションが空でフォーマットがlines
-            [[ -n "${_crshini_get_current_section}" ]] && _crshini_get_output+=("[ ${_crshini_get_current_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+            if [[ -z "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" ]] || [[ -z "${_crshini_get_fileline[$(( __line - 1 ))]##*=}" ]]; then
+                continue
+            elif [[ -n "${_crshini_get_current_section}" ]]; then
+                _crshini_get_output+=("[ ${_crshini_get_current_section} ] ${_crshini_get_fileline[$(( __line - 1 ))]%%=*} = ${_crshini_get_fileline[$(( __line - 1 ))]##*=}")
+            fi
         fi
     done
     if [[ -z "${_crshini_get_param}" ]]; then
