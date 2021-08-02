@@ -40,12 +40,6 @@ _version(){
     echo "Path=${libcrshini}"
 }
 
-# Find libcrshini
-libcrshini_list=("${script_path}/libcrshini" "/lib/libcrshini")
-for libcrshini in "${libcrshini_list[@]}"; do
-    [[ -f "${libcrshini}" ]] && source "${libcrshini}" && break
-done
-
 # Parse options
 ARGUMENT=("${@}")
 OPTS=("h")
@@ -97,7 +91,7 @@ while true; do
             shift 2
             ;;
         --debug)
-            export _crshini_debug=true
+            _crshini_debug=true
             shift 1
             ;;
         --)
@@ -105,6 +99,13 @@ while true; do
             break
             ;;
     esac
+done
+
+
+# Find libcrshini
+libcrshini_list=("${script_path}/libcrshini" "/lib/libcrshini")
+for libcrshini in "${libcrshini_list[@]}"; do
+    [[ -f "${libcrshini}" ]] && source "${libcrshini}" && break
 done
 
 if [[ "${mode}" = "none" ]]; then
@@ -132,18 +133,18 @@ fi
 case "${mode}" in
     "get")
         _check_arg 1 3 "${@}"
-        _crshini_get_format="${format}" _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_get "${@}"
+        _crshini_get_format="${format}" _crshini_output="-" _crshini_stdin="${stdin}" _crshini_debug="${_crshini_debug}" _crshini_get "${@}"
         ;;
     "set")
         _check_arg 4 4 "${@}"
-        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_set "${@}"
+        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_debug="${_crshini_debug}" _crshini_set "${@}"
         ;;
     "merge")
         _check_arg 1 2 "${@}"
-        _crshini_output="${output}" _crshini_stdin=true _crshini_merge "${@}"
+        _crshini_output="${output}" _crshini_stdin=true _crshini_debug="${_crshini_debug}" _crshini_merge "${@}"
         ;;
     "del")
         _check_arg 1 0 "${@}"
-        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_del "${@}"
+        _crshini_output="${output}" _crshini_stdin="${stdin}" _crshini_debug="${_crshini_debug}" _crshini_del "${@}"
         ;;
 esac
