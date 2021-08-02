@@ -77,6 +77,7 @@ _crshini_get(){
 
     ! [[ "${_crshini_get_format}" = "lines" || "${_crshini_get_format}" = "default" || "${_crshini_get_format}" = "ini" || "${_crshini_get_format}" = "sh" ]] && _crshini_msg_err "Incorrect format" && return 1
 
+    # 行を配列に代入
     if [[ "${_crshini_stdin}" = true ]]; then
         readarray -t _crshini_get_fileline
     else
@@ -88,27 +89,29 @@ _crshini_get(){
 
     _crshini_get_section="${1-""}" _crshini_get_param="${2-""}"
 
+    # 1行ずつ処理を行う
     for __line in $(seq "${#_crshini_get_fileline[@]}"); do
-        [[ -z "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" ]] && continue
+        #[[ -z "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" ]] && continue
+        [[ "${_crshini_get_fileline[$(( __line - 1 ))]}" = "#"* ]] && continue
         if [[ -n "${_crshini_get_section}" ]]; then
             case "${_crshini_get_fileline[$(( __line - 1 ))]}" in
-                "[${_crshini_get_section}]")
+                "#"* | "")
+                    continue
+                    ;;
+                *"[${_crshini_get_section}]"*)
                     _crshini_get_insection=true
                     _crshini_msg_dbg "${__line}行目でセクション${_crshini_get_section}に入りました"
                     continue
                     ;;
-                "["*"]")
+                *"["*"]"*)
                     _crshini_get_insection=false
                     continue
                     ;;
-                "" | "#"*)
-                    continue
-                    ;;
             esac
-        elif [[ "${_crshini_get_fileline[$(( __line - 1 ))]}" = "["*"]" ]]; then
+        elif [[ "${_crshini_get_fileline[$(( __line - 1 ))]}" = *"["*"]"* ]]; then
             case "${_crshini_get_format}" in
                 "default" | "sh")
-                    _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]}" | sed "s|^\[||g; s|\]$||g")")
+                    _crshini_get_output+=("$(echo "${_crshini_get_fileline[$(( __line - 1 ))]%%#*}" | sed "s|\s*\[||g; s|\]\s*$||g")")
                     ;;
                 "ini")
                     _crshini_get_output+=("${_crshini_get_fileline[$(( __line - 1 ))]}")
