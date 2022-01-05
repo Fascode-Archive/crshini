@@ -251,7 +251,8 @@ _crshini_set(){
 # _crshini_set file [section]
 _crshini_merge(){
     # Set variables
-    local _crshini_merge_file="${1}" _crshini_merge_section="${2-""}" _crshini_merge_source __section _crshini_merge_sectionlist=() _crshini_merge_source="$(cat -)"
+    local _crshini_merge_file="${1}" _crshini_merge_section="${2-""}" _crshini_merge_source __section _crshini_merge_sectionlist=() _crshini_merge_source
+    _crshini_merge_source="$(cat -)"
     _crshini_chkfile "${_crshini_merge_file}"
 
     # Get sections
