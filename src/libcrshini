@@ -24,6 +24,9 @@ _crshini_msg_dbg(){
 
 # Output function
 _crshini_print(){
+    local _crshini_print_output=("${@}")
+    readarray -t _crshini_print_output < <(printf "%s\n" "${_crshini_print_output[@]}" | sed 's/^[[:blank:]]*//')
+
     if [[ "${_crshini_output}" = "-" ]]; then
         [[ -n "${*}" ]] && echo "${@}"
     else
@@ -125,7 +128,7 @@ _crshini_get(){
 
         if [[ -n "${_crshini_get_section}" ]]; then
             if [[ "${_crshini_get_insection}" = true ]]; then
-                if [[ -z "${_crshini_get_param}" ]] || [[ "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_get_param}" ]]; then
+                if [[ -z "${_crshini_get_param}" ]] || [[ ! "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_get_param}" ]]; then
                     if [[ -n "${_crshini_get_param}" ]]; then
                         _crshini_msg_dbg "${__line}行目に発見しました"
                         if [[ "${_crshini_get_linemode}" = true ]]; then
