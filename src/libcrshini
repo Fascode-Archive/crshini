@@ -24,14 +24,20 @@ _crshini_msg_dbg(){
 
 # Output function
 _crshini_print(){
-    local _crshini_print_output=("${@}")
-    readarray -t _crshini_print_output < <(printf "%s\n" "${_crshini_print_output[@]}" | sed 's/^[[:blank:]]*//')
+    local _crshini_print_output=() _str
+    #readarray -t _crshini_print_output < <(printf "%s\n" "${_crshini_print_output[@]}" | sed 's/^[[:blank:]]*//')
+
+    for _str in "${@}"; do
+        #shellcheck disable=SC2001
+        _crshini_print_output+=("$(echo "${_str}" |  sed 's/^ *//; s/\s*$//')")
+    done
+
 
     if [[ "${_crshini_output}" = "-" ]]; then
-        [[ -n "${*}" ]] && echo "${@}"
+        [[ -n "${*}" ]] && printf "%s\n" "${_crshini_print_output[@]}"
     else
         _crshini_output="$(realpath "${_crshini_output}")"
-        echo "${@}" > "${_crshini_output}"
+        printf "%s\n" "${_crshini_print_output[@]}" > "${_crshini_output}"
     fi
     return 0
 }
