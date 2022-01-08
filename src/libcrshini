@@ -65,7 +65,7 @@ _crshini_chkfile(){
     local _file="${1-""}" _return=0
     if [[ -z "${_file}"   ]]; then
         _crshini_msg_err "Please specify the file path" 
-        _return 1
+        _return=1
     elif [[ ! -f "${_file}" ]]; then
         _crshini_msg_err "No such file or directory"
         _return=1
