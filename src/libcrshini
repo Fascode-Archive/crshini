@@ -11,7 +11,7 @@ set -eu
 # Message function
 _crshini_msg_common(){
     local _funcname="${FUNCNAME[2]#_crshini_}"
-    echo "[libcrshini] $(yes " " 2> /dev/null  | head -n "$(( 7 - ${#_funcname} ))" | tr -d "\n"; ) ${_funcname} ${*}" >&2
+    echo "[libcrshini] $(yes " " 2> /dev/null  | head -n "$(( 8 - ${#_funcname} ))" | tr -d "\n"; ) ${_funcname} ${*}" >&2
 }
 _crshini_msg_err(){ _crshini_msg_common "Error ${*}"; }
 _crshini_msg_dbg(){ _crshini_msg_common " Info ${*}"; }
@@ -20,6 +20,10 @@ _crshini_msg_dbg(){
     if [[ "${_crshini_debug-false}" = true ]]; then
         _crshini_msg_common "Debug ${*}";
     fi
+}
+
+_crshini_removeblank(){
+    sed 's/^ *//; s/ *$//'
 }
 
 # Output function
@@ -63,7 +67,7 @@ _crshini_index_from_str(){
 # _crshini_chkfile file
 _crshini_chkfile(){
     local _file="${1-""}" _return=0
-    if [[ -z "${_file}"   ]]; then
+    if [[ -z "${_file}" ]]; then
         _crshini_msg_err "Please specify the file path" 
         _return=1
     elif [[ ! -f "${_file}" ]]; then
@@ -134,7 +138,7 @@ _crshini_get(){
 
         if [[ -n "${_crshini_get_section}" ]]; then
             if [[ "${_crshini_get_insection}" = true ]]; then
-                if [[ -z "${_crshini_get_param}" ]] || [[ ! "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}" = "${_crshini_get_param}" ]]; then
+                if [[ -z "${_crshini_get_param}" ]] || [[ "$(_crshini_removeblank <<< "${_crshini_get_fileline[$(( __line - 1 ))]%%=*}")" = "${_crshini_get_param}" ]]; then
                     if [[ -n "${_crshini_get_param}" ]]; then
                         _crshini_msg_dbg "${__line}行目に発見しました"
                         if [[ "${_crshini_get_linemode}" = true ]]; then
